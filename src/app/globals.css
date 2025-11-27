@@ -1,5 +1,6 @@
 
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-border: oklch(0.922 0 0);

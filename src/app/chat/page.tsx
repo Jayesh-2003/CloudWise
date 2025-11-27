@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import ReactMarkdown from "react-markdown";
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -106,7 +108,9 @@ export default function ChatPage() {
                     : "bg-blue-600 text-white rounded-tr-none"
                 )}
               >
-                {msg.content}
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
               </div>
             </div>
           ))}
