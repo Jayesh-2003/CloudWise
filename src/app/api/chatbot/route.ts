@@ -1,18 +1,34 @@
 import { NextResponse } from "next/server";
 import { bedrockClient } from "@/lib/aws-clients";
 import { InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { getAllInstances, getLogs } from "@/lib/data-fetchers";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const message = body.message;
 
-    const systemPrompt =
-      "You are CloudWise Alarm Assistant. Answer questions about AWS EC2 management, costs, and alarms concisely.";
+    // 1. Fetch Context Data
+    const [instances, logs] = await Promise.all([
+      getAllInstances(),
+      getLogs(10), // Fetch last 10 logs
+    ]);
+
+    const contextData = `
+Current System State:
+- Active Instances: ${JSON.stringify(instances, null, 2)}
+- Recent Logs: ${JSON.stringify(logs, null, 2)}
+    `.trim();
+
+    const systemPrompt = `You are CloudWise Alarm Assistant. Answer questions about AWS EC2 management, costs, and alarms concisely.
+    
+${contextData}
+
+Use the above context to answer the user's question. If the user asks about instances or logs, refer to the provided JSON data.`;
 
     const payload = {
       anthropic_version: "bedrock-2023-05-31",
-      max_tokens: 512,
+      max_tokens: 1024,
       temperature: 0.2,
       system: systemPrompt,
       messages: [{ role: "user", content: message }],
